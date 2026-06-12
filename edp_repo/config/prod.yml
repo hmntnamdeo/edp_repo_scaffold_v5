@@ -1,0 +1,8 @@
+# Production environment config
+catalog_name:      prod_catalog
+adls_account:      edpprodlake
+adf_name:          adf-edp-prod
+databricks_host:   https://adb-prod.azuredatabricks.net
+key_vault_name:    kv-edp-prod
+pbi_workspace:     EDP Production
+cluster_workers:   8

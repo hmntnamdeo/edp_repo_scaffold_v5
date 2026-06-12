@@ -1,0 +1,76 @@
+name: CI — pull request gates
+
+on:
+  pull_request:
+    branches: [develop, main]
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install linters
+        run: pip install flake8 sqlfluff
+      - name: Python lint (Flake8)
+        run: flake8 databricks/ mapping_files/ --max-line-length=120
+      - name: SQL lint (SQLFluff)
+        run: sqlfluff lint databricks/migrations/ --dialect sparksql
+
+  unit-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install dependencies
+        run: pip install pytest pytest-cov pyspark
+      - name: Run unit tests (min 80% coverage)
+        run: pytest tests/unit/ --cov=databricks --cov-fail-under=80 --cov-report=term
+
+  secrets-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: TruffleHog secrets scan
+        uses: trufflesecurity/trufflehog@main
+        with:
+          path: ./
+          base: ${{ github.event.repository.default_branch }}
+          head: HEAD
+
+  adf-validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: ADF ARM template validation
+        run: |
+          npm install -g arm-ttk
+          arm-ttk -TemplatePath adf/
+
+  bundle-validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Databricks CLI
+        run: pip install databricks-cli
+      - name: Databricks bundle validate (dev target)
+        run: databricks bundle validate --target dev
+        env:
+          DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST_DEV }}
+          DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN_DEV }}
+
+  uc-schema-diff:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Unity Catalog schema diff — detect breaking changes
+        run: python unity_catalog/scripts/schema_diff.py

@@ -1,0 +1,32 @@
+# UAT clone scope
+# clone_source: where the provisioning notebook reads from
+# source_ingestion_pathway: true = bypass cloning for source system changes
+
+landing:
+  clone_source: uat_stable
+  source_ingestion_pathway: true
+  # Source pathway only — schema: feat_landing_[SRC]_[ENV]
+
+euh:
+  clone_source: euh_prod_mirror_[SRC]
+  source_ingestion_pathway: true
+  schemas:
+    - euh_prod_mirror_BLP
+    - euh_prod_mirror_ARB
+    - euh_prod_mirror_CLM
+    - euh_prod_mirror_KBL
+    - euh_prod_mirror_FIN
+    - euh_prod_mirror_AIF
+
+curated:
+  clone_source: stable_[DOMAIN]
+  source_ingestion_pathway: false
+  domains:
+    - plan
+    - sourcing
+    - deliver
+    - master
+    - config
+    - mapping
+  modified_tables: deep_clone
+  context_tables: shallow_clone

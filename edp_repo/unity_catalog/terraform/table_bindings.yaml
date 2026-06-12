@@ -1,0 +1,135 @@
+# unity_catalog/terraform/table_bindings.yaml
+#
+# Row filter binding registry — explicit list of tables that have row-level security.
+#
+# IMPORTANT: Inclusion in this file is a deliberate decision, not derived from
+# table name. This platform has inconsistent naming — some dim_* tables carry
+# row-level data and need filters; some fact_* tables do not.
+# The data lead confirms whether a table needs a binding when reviewing the PR
+# that introduces the notebook.
+#
+# This file is NOT read by Terraform. It is read by:
+#   - databricks/notebooks/infra/apply_row_filter.py  (called by every curated notebook on first run)
+#   - unity_catalog/scripts/schema_diff.py            (CI gate — checks filter column integrity
+#                                                       and warns reviewer about unregistered tables)
+#
+# Why not Terraform?
+#   Tables are created on the fly by notebooks (Delta write → UC registration).
+#   Terraform cannot ALTER TABLE against a table that does not yet exist.
+#   The filter functions ARE deployed by Terraform (row_filters.tf).
+#   The binding happens at notebook first-run time via apply_row_filter.py.
+#
+# Adding a table that needs a row filter:
+#   1. Add an entry here in the same PR as the notebook.
+#   2. The CI gate warns the reviewer if a new curated notebook has no entry here —
+#      reviewer confirms intentional (no security needed) or adds the entry.
+#   3. apply_row_filter.py reads this file and applies ALTER TABLE ... SET ROW FILTER.
+#
+# Adding a table that does NOT need a row filter:
+#   No entry needed. apply_row_filter.py exits cleanly with SKIPPED.
+#
+# Changing a binding after a table is live:
+#   Use a migration script in databricks/migrations/platform/ — not a manual ALTER TABLE.
+
+table_bindings:
+
+  # ── sourcing domain — Legal entity filter ──────────────────────────────────
+  # Ariba/CLM models — company_code is the filter column
+
+  - schema: sourcing
+    table: fact_spend
+    row_filter: fn_legal_entity_filter
+    filter_column: company_code
+    domain: sourcing
+    group: Ariba/CLM
+    notes: "70GB model — performance gate required before go-live"
+
+  - schema: sourcing
+    table: fact_contracts
+    row_filter: fn_legal_entity_filter
+    filter_column: company_code
+    domain: sourcing
+    group: Ariba/CLM
+
+  - schema: sourcing
+    table: fact_sourcing_events
+    row_filter: fn_legal_entity_filter
+    filter_column: company_code
+    domain: sourcing
+    group: Ariba/CLM
+
+  - schema: sourcing
+    table: fact_po_lines
+    row_filter: fn_legal_entity_filter
+    filter_column: company_code
+    domain: sourcing
+    group: Spend
+
+  # ── plan domain — LOB filter ───────────────────────────────────────────────
+  # MSC models — lob_code is the filter column
+
+  - schema: plan
+    table: fact_mot
+    row_filter: fn_lob_filter
+    filter_column: lob_code
+    domain: plan
+    group: MSC
+
+  - schema: plan
+    table: fact_demand_plan
+    row_filter: fn_lob_filter
+    filter_column: lob_code
+    domain: plan
+    group: MSC
+
+  # ── deliver domain — LOB filter (RTP models) ───────────────────────────────
+
+  - schema: deliver
+    table: fact_rtp_plan
+    row_filter: fn_lob_filter
+    filter_column: lob_code
+    domain: deliver
+    group: RTP
+
+  - schema: deliver
+    table: fact_rtp_actual
+    row_filter: fn_lob_filter
+    filter_column: lob_code
+    domain: deliver
+    group: RTP
+
+  - schema: deliver
+    table: fact_shipments
+    row_filter: fn_lob_filter
+    filter_column: lob_code
+    domain: deliver
+    group: RTP
+
+  # ── deliver domain — Asset filter (Kabal + ADC models) ────────────────────
+
+  - schema: deliver
+    table: fact_kabal_logistics
+    row_filter: fn_asset_filter
+    filter_column: asset_id
+    domain: deliver
+    group: Kabal
+
+  - schema: deliver
+    table: fact_adc_delivery
+    row_filter: fn_asset_filter
+    filter_column: asset_id
+    domain: deliver
+    group: ADC
+    notes: "ADC go-live Jan 2027 — validates asset filter pattern"
+
+  # ── MSVC — no row filter ───────────────────────────────────────────────────
+  # MSVC access is schema-level GRANT in grants.tf — no per-table binding needed.
+  # Documented here for completeness.
+
+  - schema: euh_BLP   # prod_catalog.euh_BLP
+    table: "*"
+    row_filter: none
+    filter_column: none
+    domain: EUH
+    group: MSVC
+    notes: "Schema-level SELECT GRANT to MSVC-Approved group in grants.tf — no row filter"

@@ -1,0 +1,9 @@
+# UAT environment config
+catalog_name:      uat_catalog
+adls_account:      edpuatlake
+adf_name:          adf-edp-uat
+databricks_host:   https://adb-uat.azuredatabricks.net
+key_vault_name:    kv-edp-uat
+env_id:            X59
+pbi_workspace:     EDP UAT
+cluster_workers:   4

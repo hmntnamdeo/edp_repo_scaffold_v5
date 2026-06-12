@@ -1,0 +1,74 @@
+# Source system registry — single source of truth
+# No connection string may be hardcoded anywhere else in the codebase
+# Adding a source: add a block here, raise a PR, data lead approves
+
+source_systems:
+
+  - id: BLP
+    name: SAP ERP BLP
+    type: jdbc
+    owner_team: finance-systems
+    endpoints:
+      A59: jdbc:sap://sap-A59.internal:30015    # dev env ID
+      X59: jdbc:sap://sap-X59.internal:30015    # UAT source env ID
+      prod: jdbc:sap://sap-prod.internal:30015
+    secret_key_vault_prefix: sap-BLP
+    landing_schema_prefix: landing_BLP           # + _[envID] in dev, bare in prod
+    euh_schema_prefix: euh_BLP                  # + _[envID] in dev, bare in prod
+
+  # Add remaining SAP ERP instances here following the same pattern
+  # Each ERP instance gets its own short ID
+
+  - id: ARB
+    name: Ariba
+    type: api
+    owner_team: procurement-systems
+    endpoints:
+      A59: https://api-sandbox.ariba.com/v2
+      X59: https://api-uat.ariba.com/v2
+      prod: https://api.ariba.com/v2
+    secret_key_vault_prefix: ariba
+    landing_schema_prefix: landing_ARB
+    euh_schema_prefix: euh_ARB
+
+  - id: CLM
+    name: CLM Contracting
+    type: api
+    owner_team: procurement-systems
+    endpoints:
+      A59: https://api-sandbox.clm.internal/v1
+      X59: https://api-uat.clm.internal/v1
+      prod: https://api.clm.internal/v1
+    secret_key_vault_prefix: clm
+    landing_schema_prefix: landing_CLM
+    euh_schema_prefix: euh_CLM
+
+  - id: KBL
+    name: Kabal
+    type: api
+    owner_team: logistics-systems
+    endpoints:
+      A59: https://api-dev.kabal.io/v1
+      X59: https://api-uat.kabal.io/v1
+      prod: https://api.kabal.io/v1
+    secret_key_vault_prefix: kabal
+    landing_schema_prefix: landing_KBL
+    euh_schema_prefix: euh_KBL
+
+  - id: FIN
+    name: Finance Data Hub
+    type: lake_repoint
+    owner_team: finance-platform
+    endpoints:
+      prod: abfss://finance@finlake.dfs.core.windows.net/
+    landing_schema_prefix: landing_FIN
+    euh_schema_prefix: euh_FIN
+
+  - id: AIF
+    name: AIF Data Lake (ADC source)
+    type: lake_repoint
+    owner_team: aif-platform
+    endpoints:
+      prod: abfss://adc@aiflake.dfs.core.windows.net/
+    landing_schema_prefix: landing_AIF
+    euh_schema_prefix: euh_AIF

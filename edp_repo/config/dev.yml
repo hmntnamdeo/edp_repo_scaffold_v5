@@ -1,0 +1,10 @@
+# Dev environment config
+# No secrets here — all secrets fetched from Azure Key Vault at runtime
+catalog_name:      dev_catalog
+adls_account:      edpdevlake
+adf_name:          adf-edp-dev
+databricks_host:   https://adb-dev.azuredatabricks.net
+key_vault_name:    kv-edp-dev
+env_id:            A59
+pbi_workspace:     EDP Dev
+cluster_workers:   2

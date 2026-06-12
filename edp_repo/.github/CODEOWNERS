@@ -1,0 +1,17 @@
+# EDP platform — code ownership
+# All paths relative to repo root
+
+adf/                              @data-lead @adf-owner
+databricks/notebooks/landing/     @data-lead @adf-owner
+databricks/notebooks/euh/         @data-lead @senior-engineers
+databricks/notebooks/curated/     @data-lead @senior-engineers
+databricks/notebooks/curated/msc/ @data-lead @scala-specialist
+databricks/migrations/            @data-lead @senior-engineers
+unity_catalog/terraform/          @data-lead @security-engineer
+powerbi/                          @data-lead @bi-engineer
+mapping_files/                    @data-lead @bi-engineer
+infrastructure/                   @devops-engineer
+config/source_systems.yml         @data-lead @release-manager
+config/uat_clone_scope.yml        @data-lead
+.github/                          @devops-engineer @data-lead
+docs/                             @data-lead

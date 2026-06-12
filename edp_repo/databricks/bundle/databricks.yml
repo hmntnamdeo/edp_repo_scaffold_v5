@@ -1,0 +1,45 @@
+bundle:
+  name: edp-data-platform
+
+variables:
+  catalog:
+  euh_schema:
+  domain_schema:
+  cluster_workers:
+
+resources:
+  jobs:
+    curated_orchestration:
+      name: Curated daily orchestration
+      tasks:
+        # Add tasks here as models are built
+        # Pattern:
+        # - task_key: master_dim_vendor
+        #   notebook_task:
+        #     notebook_path: ../notebooks/curated/master/dim_vendor.py
+        #     base_parameters:
+        #       catalog: ${var.catalog}
+        #       euh_schema: ${var.euh_schema}
+        #       domain_schema: ${var.domain_schema}
+
+targets:
+  dev:
+    variables:
+      catalog:        dev_catalog
+      euh_schema:     euh_BLP_A59        # update per sprint
+      domain_schema:  feat_placeholder   # set at sprint kickoff
+      cluster_workers: 2
+
+  uat:
+    variables:
+      catalog:        uat_catalog
+      euh_schema:     euh_prod_mirror_BLP
+      domain_schema:  stable_sourcing    # update per feature
+      cluster_workers: 4
+
+  prod:
+    variables:
+      catalog:        prod_catalog
+      euh_schema:     euh_BLP
+      domain_schema:  sourcing
+      cluster_workers: 8
